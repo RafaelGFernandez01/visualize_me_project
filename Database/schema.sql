@@ -6,10 +6,15 @@
 -- To reset the sample schema, replace everything with
 -- two dots ('..' - without quotes).
 
+-- DROP TABLE transaction CASCADE;
+-- DROP TABLE product CASCADE;
+-- DROP TABLE ports CASCADE;
+-- DROP TABLE importer CASCADE;
+
 CREATE TABLE "transaction" (
     "dua" text   NOT NULL,
     "date" date   NOT NULL,
-    "bl" int   NOT NULL,
+    "bl" text   NOT NULL,
     "country_of_origin" text   NOT NULL,
     "acquisition_country" text   NOT NULL,
     "loading_port" text   NOT NULL,
@@ -17,8 +22,8 @@ CREATE TABLE "transaction" (
     "transport_agent" text   NOT NULL,
     "custom_agent" text   NOT NULL,
     "custom" text   NOT NULL,
-    "gross_Kg" int   NOT NULL,
-    "net_Kg" int   NOT NULL,
+    "gross_kg" int   NOT NULL,
+    "net_kg" int   NOT NULL,
     "usd_fob_total" real   NOT NULL,
     "usd_freight_total" real   NOT NULL,
     "usd_cfr_total" real   NOT NULL,
@@ -26,17 +31,17 @@ CREATE TABLE "transaction" (
     "usd_fob_unit" real   NOT NULL,
     "usd_cif_unit" real   NOT NULL,
     "exporter" text   NOT NULL,
-    "hts_code" int   NOT NULL,
-    "importer" int   NOT NULL,
+    "hts_code" bigint   NOT NULL,
+    "importer" bigint   NOT NULL,
     CONSTRAINT "pk_transaction" PRIMARY KEY (
         "dua"
      )
 );
 
 CREATE TABLE "product" (
-    "hts_code" int   NOT NULL,
+    "hts_code" bigint   NOT NULL,
     "hts_code_description" text   NOT NULL,
-    "comercial_description" text   NOT NULL,
+    "commercial_description" text   NOT NULL,
     "description" text   NOT NULL,
     "description1" text   NOT NULL,
     "description2" text   NOT NULL,
@@ -49,7 +54,7 @@ CREATE TABLE "product" (
 );
 
 CREATE TABLE "importer" (
-    "tax_id" int   NOT NULL,
+    "tax_id" bigint   NOT NULL,
     "name" text   NOT NULL,
     CONSTRAINT "pk_importer" PRIMARY KEY (
         "tax_id"
@@ -66,8 +71,9 @@ CREATE TABLE "ports" (
      )
 );
 
-ALTER TABLE "transaction" ADD CONSTRAINT "fk_transaction_loading_port" FOREIGN KEY("loading_port")
-REFERENCES "ports" ("port_name");
+-- TODO: WE will work on this later, need to clean up the port table and format ids
+-- ALTER TABLE "transaction" ADD CONSTRAINT "fk_transaction_loading_port" FOREIGN KEY("loading_port")
+-- REFERENCES "ports" ("port_name");
 
 ALTER TABLE "transaction" ADD CONSTRAINT "fk_transaction_hts_code" FOREIGN KEY("hts_code")
 REFERENCES "product" ("hts_code");
