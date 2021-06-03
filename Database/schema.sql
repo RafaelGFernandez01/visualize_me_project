@@ -6,10 +6,10 @@
 -- To reset the sample schema, replace everything with
 -- two dots ('..' - without quotes).
 
--- DROP TABLE transaction CASCADE;
--- DROP TABLE product CASCADE;
--- DROP TABLE ports CASCADE;
--- DROP TABLE importer CASCADE;
+DROP TABLE transaction CASCADE;
+DROP TABLE product CASCADE;
+DROP TABLE ports CASCADE;
+DROP TABLE importer CASCADE;
 
 CREATE TABLE "transaction" (
     "dua" text   NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE "transaction" (
     "usd_cif_unit" real   NOT NULL,
     "exporter" text   NOT NULL,
     "hts_code" bigint   NOT NULL,
-    "importer" bigint   NOT NULL,
+    "importer_id" bigint   NOT NULL,
     CONSTRAINT "pk_transaction" PRIMARY KEY (
         "dua"
      )
@@ -78,6 +78,6 @@ CREATE TABLE "ports" (
 ALTER TABLE "transaction" ADD CONSTRAINT "fk_transaction_hts_code" FOREIGN KEY("hts_code")
 REFERENCES "product" ("hts_code");
 
-ALTER TABLE "transaction" ADD CONSTRAINT "fk_transaction_importer" FOREIGN KEY("importer")
+ALTER TABLE "transaction" ADD CONSTRAINT "fk_transaction_importer" FOREIGN KEY("importer_id")
 REFERENCES "importer" ("tax_id");
 
