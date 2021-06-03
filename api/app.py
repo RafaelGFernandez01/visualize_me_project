@@ -51,7 +51,9 @@ def welcome():
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/products<br/>"
-        f"/api/v1.0/dashboard"
+        f"/api/v1.0/importers<br/>"
+        f"/api/v1.0/importers/&lt;importer_id&gt;<br/>"
+        f"/api/v1.0/dashboard/&lt;product_id&gt;"
     )
 
 
@@ -60,7 +62,6 @@ def products():
     all_products = []
 
     for row in session.query(Product).all():
-        print(row.__dict__)
         product = {
             "hts_code": row.hts_code,
             "hts_code_description": row.hts_code_description,
@@ -75,6 +76,35 @@ def products():
         all_products.append(product)
 
     return jsonify({ "products": all_products })
+
+@app.route("/api/v1.0/importers")
+def importers():
+    all_importers = []
+
+    for row in session.query(Importer).all():
+        importer = {
+            "tax_id": row.tax_id,
+            "name": row.name.strip(),
+        }
+        all_importers.append(importer)
+
+    return jsonify({ "importers": all_importers })
+
+
+@app.route("/api/v1.0/importers/<importer_id>")
+def importer(importer_id):
+    record = session.query(
+        Importer
+    ).filter(
+        Importer.tax_id == importer_id,
+    ).one()
+
+    importer = {
+        "tax_id": record.tax_id,
+        "name": record.name.strip(),
+    }
+
+    return jsonify(importer)
 
 
 @app.route("/api/v1.0/dashboard/<product_id>")
@@ -100,12 +130,12 @@ def dashboard(product_id):
 
     # get top importers by net_kg
     records = session.query(
-        Transaction.importer_id,
+        Transaction.importer_name,
         func.sum(Transaction.net_kg),
     ).filter(
         Transaction.hts_code == product_id,
     ).group_by(
-        Transaction.importer_id
+        Transaction.importer_name
     ).order_by(
         desc(func.sum(Transaction.net_kg))
     ).limit(5).all()
@@ -121,12 +151,12 @@ def dashboard(product_id):
 
     # get top importers by usd_fob_total
     records = session.query(
-        Transaction.importer_id,
+        Transaction.importer_name,
         func.sum(Transaction.usd_fob_total),
     ).filter(
         Transaction.hts_code == product_id,
     ).group_by(
-        Transaction.importer_id
+        Transaction.importer_name
     ).order_by(
         desc(func.sum(Transaction.usd_fob_total))
     ).limit(5).all()

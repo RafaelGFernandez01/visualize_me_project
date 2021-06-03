@@ -33,6 +33,7 @@ CREATE TABLE "transaction" (
     "exporter" text   NOT NULL,
     "hts_code" bigint   NOT NULL,
     "importer_id" bigint   NOT NULL,
+    "importer_name" text   NOT NULL,
     CONSTRAINT "pk_transaction" PRIMARY KEY (
         "dua"
      )

@@ -1,31 +1,110 @@
-console.log('Hello rafa!!');
+function format_number(val) {
+    return parseFloat(parseFloat(val).toFixed(2)).toLocaleString();
+}
 
-async function getDashboard(productId) {
+function format_name(val) {
+    return val.slice(0, 40).toLowerCase();
+}
+
+async function fill_products_select() {
+    const products = await get_products();
+
+    const selectObject = d3.select("#product-ids");
+    selectObject.html("");
+
+    products.forEach((product) => {
+        selectObject
+            .append("option")
+            .attr("class", "text-capitalize")
+            .attr("value", product.hts_code)
+            .text(format_name(product.hts_code_description));
+    });
+}
+
+async function get_dashboard_data(productId) {
     console.log('Fetching dashboard for product id:', productId);
 
     const response = await fetch(`http://localhost:5001/api/v1.0/dashboard/${productId}`);
     const body = await response.json();
 
-    console.log('Dashboard:', body);
-
-    console.log("Name of first:", body[0].name);
+    return body;
 }
 
-async function getProducts() {
+async function get_products() {
     console.log('Fetching products');
 
     const response = await fetch('http://localhost:5001/api/v1.0/products');
-    const body = await response.json();
+    const { products } = await response.json();
+    console.log('Fetched products', products);
 
-    console.log('Products:', body);
-
-    console.log("Name of first product:", body[0].name);
+    return products;
 }
 
-getProducts()
+async function render_dashboard(product_id) {
+    const data = await get_dashboard_data(product_id);
+    render_kpis(data.aggregates);
+    render_table_top_importers('top_importers_by_net_kg', data.top_importers_by_net_kg);
+    render_table_top_importers('top_importers_by_usd_fob_total', data.top_importers_by_usd_fob_total);
+    render_table_top_country('top_country_of_origins_by_net_kg', data.top_country_of_origins_by_net_kg);
+    render_table_top_country('top_country_of_origins_by_usd_fob_total', data.top_country_of_origins_by_usd_fob_total);
+}
+
+function render_kpis(aggs) {
+    for (const key in aggs) {
+        const val = aggs[key];
+        const kpi_elem = d3.select(`#${key}`);
+        kpi_elem.html(format_number(val));
+    }
+}
+
+function render_table_top_importers (id, data) {
+    const table_body = d3.select(`#${id} tbody`);
+    table_body.html('');
+
+    data.forEach((elem, idx) => {
+        table_body
+            .append('tr')
+            .attr("class", "text-capitalize")
+            .html(`
+                <td>${idx + 1}</td>
+                <td>${format_name(elem.importer)}</td>
+                <td>${format_number(elem.value)}</td>
+            `);
+    });
+}
+function render_table_top_country (id, data) {
+    const table_body = d3.select(`#${id} tbody`);
+    table_body.html('');
+
+    data.forEach((elem, idx) => {
+        table_body
+            .append('tr')
+            .attr("class", "text-capitalize")
+            .html(`
+                <td>${idx + 1}</td>
+                <td>${format_name(elem.country_of_origin)}</td>
+                <td>${format_number(elem.value)}</td>
+            `);        
+    });
+};
+
+// render
+(async () => {
+    // fill select with products
+    await fill_products_select();
+    const selected_product = d3.select("#product-ids").property("value");
+    render_dashboard(selected_product);
+
+    // register products handler
+    d3.select('#product-ids')
+        .on('change', () => {
+            const selected_product = d3.select("#product-ids").property("value");
+            render_dashboard(selected_product);
+        });
+})()
     .then(() => {
-        console.log('Finished');
+        console.log('Rendered...');
     })
     .catch((error) => {
-        console.error('Error:', error);
+        console.error('ERROR at render', error);
     });
