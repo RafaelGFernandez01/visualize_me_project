@@ -173,11 +173,13 @@ def dashboard(product_id):
     # get top country_of_origins by net_kg
     records = session.query(
         Transaction.country_of_origin,
+        Transaction.country_of_origin_alpha_3,
         func.sum(Transaction.net_kg),
     ).filter(
         Transaction.hts_code == product_id,
     ).group_by(
-        Transaction.country_of_origin
+        Transaction.country_of_origin,
+        Transaction.country_of_origin_alpha_3,
     ).order_by(
         desc(func.sum(Transaction.net_kg))
     ).limit(5).all()
@@ -186,7 +188,8 @@ def dashboard(product_id):
     for row in records:
         data = {
             "country_of_origin": row[0],
-            "value": row[1],
+            "country_of_origin_alpha_3": row[1],
+            "value": row[2],
         }
         dashboard['top_country_of_origins_by_net_kg'].append(data)
 
@@ -194,11 +197,13 @@ def dashboard(product_id):
     # get top country_of_origins by usd_fob_total
     records = session.query(
         Transaction.country_of_origin,
+        Transaction.country_of_origin_alpha_3,
         func.sum(Transaction.usd_fob_total),
     ).filter(
         Transaction.hts_code == product_id,
     ).group_by(
-        Transaction.country_of_origin
+        Transaction.country_of_origin,
+        Transaction.country_of_origin_alpha_3,
     ).order_by(
         desc(func.sum(Transaction.usd_fob_total))
     ).limit(5).all()
@@ -207,7 +212,8 @@ def dashboard(product_id):
     for row in records:
         data = {
             "country_of_origin": row[0],
-            "value": row[1],
+            "country_of_origin_alpha_3": row[1],
+            "value": row[2],
         }
         dashboard['top_country_of_origins_by_usd_fob_total'].append(data)
 

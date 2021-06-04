@@ -47,6 +47,8 @@ async function render_dashboard(product_id) {
     render_table_top_importers('top_importers_by_usd_fob_total', data.top_importers_by_usd_fob_total);
     render_table_top_country('top_country_of_origins_by_net_kg', data.top_country_of_origins_by_net_kg);
     render_table_top_country('top_country_of_origins_by_usd_fob_total', data.top_country_of_origins_by_usd_fob_total);
+    render_map('top_country_of_origins_by_net_kg_map', data.top_country_of_origins_by_net_kg);
+    render_map('top_country_of_origins_by_usd_fob_total_map', data.top_country_of_origins_by_usd_fob_total);
 }
 
 function render_kpis(aggs) {
@@ -72,6 +74,7 @@ function render_table_top_importers (id, data) {
             `);
     });
 }
+
 function render_table_top_country (id, data) {
     const table_body = d3.select(`#${id} tbody`);
     table_body.html('');
@@ -87,6 +90,40 @@ function render_table_top_country (id, data) {
             `);        
     });
 };
+
+function render_map(id, dashboard_data) {
+    const min_value = dashboard_data.reduce((min, d) => (d.value < min ? d.value : min), Number.MAX_SAFE_INTEGER);
+    console.log('min_value', {min_value, dashboard_data});
+    const data = [{
+        type: 'scattergeo',
+        mode: 'markers',
+        locations: dashboard_data.map(d => d.country_of_origin_alpha_3),
+        marker: {
+            size: dashboard_data.map(d => (d.value / min_value) * 5),
+            color: [10, 20, 40, 50],
+            cmin: 0,
+            cmax: 50,
+            colorbar: {
+                title: 'Some rate',
+                ticksuffix: '%',
+                showticksuffix: 'last'
+            },
+            line: {
+                color: 'black'
+            }
+        },
+        name: 'europe data'
+    }];
+
+    const layout = {
+        'geo': {
+            'scope': 'world',
+            'resolution': 50
+        }
+    };
+
+    Plotly.newPlot(id, data, layout);
+}
 
 // render
 (async () => {
