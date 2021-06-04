@@ -13,7 +13,7 @@ from flask import Flask, jsonify
 # Database Setup
 #################################################
 # create engine to hawaii.sqlite 
-connection_string = "root:root@172.20.0.3:5432/custom_analysis_db"
+connection_string = "postgres:Postgress@localhost:5432/custom_analysis_db"
 engine = create_engine(f'postgresql://{connection_string}')
 conn = engine.connect()
 
